@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Phòng</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Load danh sách phòng
+        async function loadRooms() {
+            const res = await fetch("../server/api/rooms_list.php");
+            const data = await res.json();
+
+            const tbody = document.getElementById("room-table-body");
+            tbody.innerHTML = "";
+
+            data.forEach(room => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${room.room_id}</td>
+                        <td>${room.room_name}</td>
+                        <td>${room.price}</td>
+                        <td>${room.description}</td>
+                        <td>
+                            <a href="update_room.html?id=${room.room_id}">Sửa</a> |
+                            <a href="../server/delete_room.php?id=${room.room_id}" onclick="return confirm('Xóa phòng?');">Xóa</a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Submit thêm phòng
+        async function addRoom(event) {
+            event.preventDefault();
+            const formData = new FormData(document.getElementById("add-room-form"));
+
+            const res = await fetch("../server/add_room.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const text = await res.text();
+            alert(text);
+            loadRooms();
+        }
+
+        window.onload = loadRooms;
+    </script>
+</head>
+<body>
+    <h1>Quản lý phòng</h1>
+
+    <h2>Thêm phòng mới</h2>
+    <form id="add-room-form" onsubmit="addRoom(event)">
+        <input type="text" name="room_name" placeholder="Tên phòng" required><br>
+        <input type="number" name="price" placeholder="Giá" required><br>
+        <textarea name="description" placeholder="Mô tả"></textarea><br>
+        <input type="file" name="image"><br>
+        <button type="submit">Thêm phòng</button>
+    </form>
+
+    <h2>Danh sách phòng</h2>
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên phòng</th>
+                <th>Giá</th>
+                <th>Mô tả</th>
+                <th>Tuỳ chọn</th>
+            </tr>
+        </thead>
+        <tbody id="room-table-body"></tbody>
+    </table>
+
+</body>
+</html>
 
