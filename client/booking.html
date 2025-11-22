@@ -145,11 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("primary-guest").value = user.fullname || user.username || "";
   document.getElementById("contact-phone").value = user.phone || "";
 
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("user");
-    alert("Bạn đã đăng xuất.");
-    window.location.href = "login.html";
-  });
+  logoutBtn.addEventListener("click", async () => {
+  try {
+    await fetch("../server/logout.php", {
+      method: "GET",
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+  } catch (err) {
+    console.error("Logout server error:", err);
+  }
+
+  localStorage.removeItem("user");
+
+  alert("Bạn đã đăng xuất.");
+
+  window.location.href = "login.html";
+ });
 });
 </script>
 
