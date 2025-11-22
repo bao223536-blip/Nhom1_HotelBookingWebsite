@@ -100,7 +100,7 @@
           <li><a href="about.html">Giới thiệu</a></li>
           <li><a href="rooms.html">Phòng</a></li>
           <li><a href="amenities.html">Tiện nghi</a></li>
-          <li><a href="offers.shtml">Ưu đãi</a></li>
+          <li><a href="offers.html">Ưu đãi</a></li>
           <li><a href="booking.html" class="active">Đặt phòng</a></li>
           <li class="dropdown">
             <a href="#"><span>Khác</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
@@ -345,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const res = await fetch("../server/api/booking.php", {
+      const res = await fetch("../server/api/bookings.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
