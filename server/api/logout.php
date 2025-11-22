@@ -1,15 +1,12 @@
 <?php
 // logout.php
-
 session_start();
-require_once __DIR__ . '/../helpers.php';
-
-// Xóa hết session
 $_SESSION = [];
 session_unset();
 session_destroy();
 
-json_response([
-    'status'  => 'success',
-    'message' => 'Đã đăng xuất'
-]);
+$msg = urlencode('Đã đăng xuất');
+$typ = 'success';
+header("Location: ../client/login.html?msg={$msg}&type={$typ}");
+exit;
+?>
