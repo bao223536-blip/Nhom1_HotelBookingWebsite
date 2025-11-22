@@ -3,7 +3,12 @@
 
 require_once __DIR__ . '/../db_connect.php';
 
-$sql = "SELECT DATE_FORMAT(created_at, '%Y-%m') as period, COUNT(*) as total FROM bookings GROUP BY period ORDER BY period DESC LIMIT 6";
+// Sử dụng check_in_date thay vì created_at (không tồn tại)
+$sql = "SELECT DATE_FORMAT(check_in_date, '%Y-%m') as period, COUNT(*) as total 
+        FROM booked_room 
+        GROUP BY period 
+        ORDER BY period DESC 
+        LIMIT 6";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
