@@ -1,8 +1,8 @@
 <?php
-// search_rooms.php - Sửa theo DB homestay_db
+// search_rooms.php 
 
-require_once __DIR__ . '/db_connect.php';
-require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../helpers.php';
 
 // Nhận input từ GET
 $q = trim($_GET['q'] ?? '');
