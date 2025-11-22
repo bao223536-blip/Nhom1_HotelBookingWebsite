@@ -1,7 +1,7 @@
 <?php
 // update_room.php
 
-require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/db_connect.php';
 session_start();
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST'){
@@ -10,20 +10,32 @@ if($_SERVER['REQUEST_METHOD'] !== 'POST'){
 }
 
 $id = intval($_POST['id'] ?? 0);
-$name = trim($_POST['name'] ?? '');
-$price = trim($_POST['price'] ?? '0');
-$description = trim($_POST['description'] ?? '');
+$room_type = trim($_POST['room_type'] ?? '');
+$location = trim($_POST['location'] ?? '');
+$room_price = trim($_POST['room_price'] ?? '0');
 
 if($id <= 0){
     echo "<script>alert('ID không hợp lệ');history.back();</script>";
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT image FROM rooms WHERE id = ?");
+if($room_type === ''){
+    echo "<script>alert('Loại phòng không được để trống');history.back();</script>";
+    exit;
+}
+
+if($location === ''){
+    echo "<script>alert('Vị trí phòng không được để trống');history.back();</script>";
+    exit;
+}
+
+// Lấy ảnh cũ từ bảng homestay_images
+$stmt = $pdo->prepare("SELECT image_url FROM homestay_images WHERE homestay_id = ? LIMIT 1");
 $stmt->execute([$id]);
 $old = $stmt->fetch(PDO::FETCH_ASSOC);
-$imagePath = $old['image'] ?? '';
+$oldImagePath = $old['image_url'] ?? '';
 
+// Xử lý upload ảnh mới
 if(!empty($_FILES['image']['name'])){
     $uploadsDir = __DIR__ . '/../../client/uploads';
     if(!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
@@ -34,16 +46,30 @@ if(!empty($_FILES['image']['name'])){
         exit;
     }
 
-    if(!empty($imagePath)){
-        $oldPath = __DIR__ . '/../../client/' . $imagePath;
+    // Xóa ảnh cũ nếu có
+    if(!empty($oldImagePath)){
+        $oldPath = __DIR__ . '/../../client/' . $oldImagePath;
         if(file_exists($oldPath)) @unlink($oldPath);
     }
-    $imagePath = 'uploads/' . $safe;
+    
+    $newImagePath = 'uploads/' . $safe;
+    
+    // Cập nhật hoặc thêm ảnh mới vào homestay_images
+    $stmtCheck = $pdo->prepare("SELECT homestay_id FROM homestay_images WHERE homestay_id = ? LIMIT 1");
+    $stmtCheck->execute([$id]);
+    if($stmtCheck->fetch()){
+        $sqlImage = "UPDATE homestay_images SET image_url = :image_url WHERE homestay_id = :homestay_id";
+    } else {
+        $sqlImage = "INSERT INTO homestay_images (homestay_id, image_url) VALUES (:homestay_id, :image_url)";
+    }
+    $stmtImage = $pdo->prepare($sqlImage);
+    $stmtImage->execute([':homestay_id'=>$id, ':image_url'=>$newImagePath]);
 }
 
-$sql = "UPDATE rooms SET name=:name, price=:price, description=:description, image=:image WHERE id=:id";
+// Cập nhật thông tin phòng
+$sql = "UPDATE homestay SET room_type=:room_type, location=:location, room_price=:room_price WHERE id=:id";
 $stmt = $pdo->prepare($sql);
-$ok = $stmt->execute([':name'=>$name, ':price'=>$price, ':description'=>$description, ':image'=>$imagePath, ':id'=>$id]);
+$ok = $stmt->execute([':room_type'=>$room_type, ':location'=>$location, ':room_price'=>$room_price, ':id'=>$id]);
 
 if($ok){
     echo "<script>alert('Cập nhật phòng thành công');window.location='../../client/admin_rooms.html';</script>";
